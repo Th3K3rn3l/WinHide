@@ -3,6 +3,8 @@
 #include <string>
 
 HWND g_targetHWnd = NULL; // Глобальная переменная для хранения окна-призрака
+bool g_isPanic = false; // Нужно ли скрывать окно от всех
+
 
 int main() {
     setlocale(LC_ALL, "Russian");
@@ -40,12 +42,21 @@ int main() {
             Sleep(500);
         }
 
-        // АКТИВАЦИЯ (F3)
-        if (GetAsyncKeyState(VK_F3) & 0x8000 && g_targetHWnd != NULL) {
-            // Магия: вытаскиваем окно из небытия прямо тебе под руки
-            ShowWindow(g_targetHWnd, SW_RESTORE);
-            SetForegroundWindow(g_targetHWnd);
-            std::cout << "Окно активировано." << std::endl;
+        // [F3] УНИВЕРСАЛЬНЫЙ ВОЗВРАТ
+        if (GetAsyncKeyState(VK_F3) & 0x8000 && g_targetHWnd) {
+            g_isPanic = false; // Сбрасываем состояние паники, если нажали F3
+            ShowWindow(g_targetHWnd, SW_SHOW);    // Сначала заставляем окно ПОЯВИТЬСЯ
+            ShowWindow(g_targetHWnd, SW_RESTORE); // Затем разворачиваем, если было свернуто
+            SetForegroundWindow(g_targetHWnd);    // И кидаем в фокус
+            std::cout << "Окно принудительно возвращено в фокус." << std::endl;
+            Sleep(500);
+        }
+
+        // [F8] ТОЛЬКО СКРЫТИЕ (PANIC)
+        if (GetAsyncKeyState(VK_F8) & 0x8000 && g_targetHWnd) {
+            g_isPanic = true;
+            ShowWindow(g_targetHWnd, SW_HIDE); // Только прячем
+            std::cout << "!!! ПАНИКА !!!" << std::endl;
             Sleep(500);
         }
 
