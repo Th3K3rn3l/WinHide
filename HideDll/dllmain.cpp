@@ -9,9 +9,16 @@ void HideAllWindows() {
         DWORD windowPid;
         GetWindowThreadProcessId(hWnd, &windowPid);
 
-        // Если это окно нашего процесса — скрываем
+        // Если это окно нашего процесса
         if (windowPid == currentPid && IsWindowVisible(hWnd)) {
+            // сделать прозрачным для записи
             SetWindowDisplayAffinity(hWnd, WDA_EXCLUDEFROMCAPTURE);
+            LONG_PTR exStyle = GetWindowLongPtr(hWnd, GWL_EXSTYLE);
+            // Скрыть из alt + tab и убрать из панели задач
+            exStyle |= WS_EX_TOOLWINDOW;
+            exStyle &= ~WS_EX_APPWINDOW;
+
+            SetWindowLongPtr(hWnd, GWL_EXSTYLE, exStyle);
         }
         hWnd = GetNextWindow(hWnd, GW_HWNDNEXT); // Переходим к следующему
     }

@@ -2,27 +2,25 @@
 #include <iostream>
 #include <string>
 
+HWND g_targetHWnd = NULL; // Глобальная переменная для хранения окна-призрака
+
 int main() {
     setlocale(LC_ALL, "Russian");
     std::string dllPath = "C:\\Users\\Jinx\\source\\repos\\WinHide\\x64\\Release\\HideDll.dll";
 
-    std::cout << "Программа запущена. Наведи курсор на нужное окно и нажми F2..." << std::endl;
+    std::cout << "[F2] - Сделать окно призраком | [F3] - Вернуть окно на передний план" << std::endl;
 
     while (true) {
-        // Проверяем, нажата ли клавиша F2
+        // СКРЫТИЕ (F2)
         if (GetAsyncKeyState(VK_F2) & 0x8000) {
             POINT pt;
-            GetCursorPos(&pt); // Получаем координаты курсора
-            HWND hWnd = WindowFromPoint(pt); // Находим окно под курсором
+            GetCursorPos(&pt);
+            HWND hWnd = WindowFromPoint(pt);
 
             if (hWnd) {
-                // Поднимаемся к родительскому окну (если кликнули в кнопку или поле внутри окна)
-                HWND rootHWnd = GetAncestor(hWnd, GA_ROOT);
-
+                g_targetHWnd = GetAncestor(hWnd, GA_ROOT); // Запоминаем окно
                 DWORD pid;
-                GetWindowThreadProcessId(rootHWnd, &pid);
-
-                std::cout << "Выбрано окно. PID процесса: " << pid << ". Инжектим..." << std::endl;
+                GetWindowThreadProcessId(g_targetHWnd, &pid);
 
                 HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
                 if (hProcess) {
@@ -34,17 +32,24 @@ int main() {
                         pRemotePath, 0, NULL);
 
                     if (hThread) {
-                        std::cout << "Успешно! Окно должно стать черным для записи." << std::endl;
+                        std::cout << "Окно успешно скрыто отовсюду!" << std::endl;
                         CloseHandle(hThread);
                     }
                     CloseHandle(hProcess);
                 }
-                else {
-                    std::cout << "Ошибка открытия процесса: " << GetLastError() << std::endl;
-                }
             }
-            Sleep(500); // Защита от дребезга клавиши
+            Sleep(500);
         }
+
+        // АКТИВАЦИЯ (F3)
+        if (GetAsyncKeyState(VK_F3) & 0x8000 && g_targetHWnd != NULL) {
+            // Магия: вытаскиваем окно из небытия прямо тебе под руки
+            ShowWindow(g_targetHWnd, SW_RESTORE);
+            SetForegroundWindow(g_targetHWnd);
+            std::cout << "Окно активировано." << std::endl;
+            Sleep(500);
+        }
+
         Sleep(10);
     }
     return 0;
