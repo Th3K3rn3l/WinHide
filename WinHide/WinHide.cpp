@@ -8,8 +8,7 @@ int main() {
     setlocale(LC_ALL, "Russian");
     std::string dllPath = "C:\\Users\\Jinx\\source\\repos\\WinHide\\x64\\Release\\HideDll.dll";
 
-    std::cout << "[F2] - Сделать окно призраком | [F3] - Вернуть окно на передний план" << std::endl;
-
+    std::cout << "[F2] - Сделать окно призраком | [F3] - Вернуть окно на передний план\n[F4] - Вернуть окно в исходное состояние" << std::endl;
     while (true) {
         // СКРЫТИЕ (F2)
         if (GetAsyncKeyState(VK_F2) & 0x8000) {
